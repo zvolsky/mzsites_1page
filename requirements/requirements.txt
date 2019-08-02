@@ -1,0 +1,7 @@
+wagtail
+wagtailfontawesome
+wagtailmenus
+wagtail-condensedinlinepanel
+django-environ
+psycopg2
+logzero

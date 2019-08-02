@@ -1,0 +1,57 @@
+toto je ruční postup, který odpovídá vytvoření zipu knowhow/mzsites.zip - lze jej tedy nahradit rozbalením uvedeného zipu
+prerequisites: venv + upgraded pip+setuptools+wheel
+-------------------------------
+
+pip install wagtail
+wagtail start mzsites
+requirements.txt: wagtail wagtailfontawesome wagtailmenus wagtail-condensedinlinepanel django-environ psycopg2 logzero (lze fixnout verze, např. po instalaci)
+pip install -r requirements.txt
+mailhog
+
+předřadit DJANGO_APPS = ['django.contrib.admin', '.auth', '.contenttypes', '.sessions', '.messages', '.staticfiles']
+změnit INSTALLED_APPS na WAGTAIL_APPS
+INSTALLED_APPS = DJANGO_APPS + WAGTAIL_APPS
+mezi wagtail. a modelcluster přidat aplikace: 'wagtailfontawesome', 'wagtail.contrib.modeladmin', 'wagtailmenus', 'condensedinlinepanel'
+MIDDLEWARE: předsunout SecurityMiddleware nahoru
+	za SessionMiddleware vložit: 'django.middleware.locale.LocaleMiddleware'
+vložit: import environ  # django-environ
+změnit PROJECT_DIR=, BASE_DIR=:
+	ROOT_OBJ = environ.Path(__file__) - 2  # mzsites/mzsites/settings/base.py (nebo mzsite/config/settings/base.py) - 2 = mzsites/mzsites
+	env = environ.Env()
+	env.read_env(str(ROOT_OBJ.path("../../.env")))  # OS environment variables take precedence over variables from .env
+	# we use django-environ (~pydanny) to read .env, but we still run with old style paths as wagtail config has this
+	PROJECT_DIR = str(ROOT_OBJ)
+	assert PROJECT_DIR == os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # like django canonical?
+	BASE_DIR = str(ROOT_OBJ.path('..'))
+na konec TEMPLATES OPTIONS context_processors: 'wagtail.contrib.settings.context_processors.settings', 'wagtailmenus.context_processors.wagtailmenus'
+DATABASES= nahradit:
+	POSTGRES = False
+	if POSTGRES:   # createdb mzsite -U postgres
+	    DATABASES = {
+	        "default": env.db("DATABASE_URL", default="postgres:///mzsites")
+	    }
+	    DATABASES["default"]["ATOMIC_REQUESTS"] = True
+	else:
+	    DATABASES = {
+	        'default': {
+	            'ENGINE': 'django.db.backends.sqlite3',
+	            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+	        }
+	    }
+LANGUAGE_CODE = 'cs-cz'
+TIME_ZONE = 'Europe/Prague'
+WAGTAIL_SITE_NAME = "mz-websites"
+WAGTAIL_ALLOW_UNICODE_SLUGS = False
+WAGTAIL_DATE_FORMAT = '%d.%m.%Y'
+WAGTAIL_DATETIME_FORMAT = '%d.%m.%Y %H:%M'
+BASE_URL = 'https://mojeknihovna.eu'
+ALLOWED_HOSTS = ['localhost', '.localhost', 'mojeknihovna.eu', '.mojeknihovna.eu']
+
+home/models.py:
+	from wagtailmenus.models import MenuPage
+	class MzPage(MenuPage):
+	    is_creatable = False
+
+./manage.py migrate
+./manage.py createsuperuser
+------------------------------- ...až potud je v zipu knowhow/mzsites.zip

@@ -1,0 +1,42 @@
+venv
+pip install --upgrade pip setuptools wheel
+rozbalit mzsites.zip   # nebo ručním postupem: viz postup_start
+cd mzsites
+pip install -r requirements.txt
+
+.env v rootu (o úroveň výše nad zipovaným/gitovaným adresářem mzsites/):
+	DATABASE_URL=postgres://postgres:heslo@127.0.0.1:5432/mzsites
+	CELERY_BROKER_URL=redis://localhost:6379/0
+	SECRET_KEY=secret
+
+datarc theme (https://usebootstrap.com/theme/datarc nebo colorlib.com) nakopírováno do mzsites/templates, index.html přejmenováno na base.html
+    přidáno {% load static %} a odkazy css/,js/,img/ změněny na "{% static 'xxx/.....' %}", a to i ve styles url(...)
+selhává collectstatic: owl.video.play.png z github:OwlCarousel2 přidáno do static/img/ + opraveny reference na něj owl.. -> /img/owl..
+TODO: switch from OwlCarousel2 to https://github.com/ganlanyuan/tiny-slider
+překopírovat <title> z base-original.html
+překopírovat block extra_css, block extra_js z base-original.html
+stáhnout do vendor/ popper.min.js a v base.html nahradit cdn verzi verzí lokální
+
+nakopírovat templates/includes/ z
+
+menu:
+neodstraňovat wagtailuserbar - zajišťuje "kruhové" menu vpravo dole (pro přístup k editaci stránky)
+base.html: uvnitř <nav...><ul class="main-menu"> jsem přidal:
+  {% block menu %}
+	{% main_menu template="menus/custom_main_menu.html" sub_menu_template="menus/custom_sub_menu.html" %}
+  {% endblock menu %}
+ a v mzsites/templates/menus/ jsem vytvořil custom_main_menu a custom_sub_menu jen z položek (bez <ul>) podle .html ve wagtailmenus, např.
+  {% load menu_tags %}
+  {% for item in menu_items %}
+    <li class="{{ item.active_class }}{% if item.has_children_in_menu %} dropdown{% endif %}">
+        <a href="{{ item.href }}"{% if item.has_children_in_menu %} class="dropdown-toggle" id="ddtoggle_{{ item.pk }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"{% endif %}>{{ item.text }}{% if item.has_children_in_menu %} <span class="caret"></span>{% endif %}</a>
+        {% if item.has_children_in_menu %}
+            {% sub_menu item template=current_template %}
+        {% endif %}
+    </li>
+  {% endfor %}
+ po přidání do menu volají nové položky JavaScript, přičemž u jedné z položek bylo v $(".main-menu li a").on('click'.. preventDefault,
+    takže aby mezistránkové odkazy (bez hashe) fungovaly, musel jsem dát: if (this.hash !== "") {..}
+položky do menu se přidají v Settings
+
+debug toolbar: viz oficiální dokumentace
