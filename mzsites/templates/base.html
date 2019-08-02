@@ -824,8 +824,6 @@
 		</footer>
 
         {# Global javascript #}
-        <script type="text/javascript" src="{% static 'js/mzsites.js' %}"></script>
-
 		<script src="{% static 'js/vendor/jquery-2.2.4.min.js' %}"></script>
 		<script src="{% static 'js/vendor/popper.min.js' %}"></script>
 		<script src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
@@ -834,6 +832,8 @@
 		<script src="{% static 'js/owl.carousel.min.js' %}"></script>
 		<script src="{% static 'js/mixitup.min.js' %}"></script>
 		<script src="{% static 'js/main.js' %}"></script>
+
+        <script type="text/javascript" src="{% static 'js/mzsites.js' %}"></script>
 
         {% block extra_js %}
             {# Override this in templates to add extra javascript #}
